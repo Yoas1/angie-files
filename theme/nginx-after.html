@@ -1,0 +1,53 @@
+</div>
+</div>
+</body>
+  <script type="text/javascript">
+    (function() {
+      var allH1 = document.querySelectorAll('h1');
+      var pathElement = null;
+      for (var i = 0; i < allH1.length; i++) {
+        if (allH1[i].innerHTML.indexOf('Index of ') !== -1) {
+          pathElement = allH1[i];
+          break;
+        }
+      }
+      if (!pathElement) return;
+
+      pathElement.className = 'listing';
+      var pathName = pathElement.innerHTML;
+      pathName = pathName.replace('Index of ', '');
+      pathElement.innerHTML = '<a href="/" class="path-home"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c8cdd6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></a> <span style="color:#c8cdd6">' + pathName + '</span>';
+
+      var fileCount = 0, dirCount = 0;
+      var dirStatElem = document.getElementById('dir-stats');
+      var fileStatElem = document.getElementById('file-stats');
+
+      var allLinks = document.querySelectorAll('a');
+      for (let item of allLinks) {
+        if (item.classList.contains('path-home')) continue;
+        if (item.innerHTML === '../') {
+          item.className = 'folderup';
+          item.innerHTML = '&#8682; Up';
+          continue;
+        }
+        if (item.innerHTML.endsWith('/')) {
+          dirCount++;
+        } else {
+          fileCount++;
+        }
+        item.className = 'link-icon';
+      }
+
+      if (dirCount === 1) {
+        dirStatElem.innerHTML = dirCount + " directory";
+      } else {
+        dirStatElem.innerHTML = dirCount + " directories";
+      }
+      if (fileCount === 1) {
+        fileStatElem.innerHTML = fileCount + " file";
+      } else {
+        fileStatElem.innerHTML = fileCount + " files";
+      }
+    })();
+  </script>
+</html>
