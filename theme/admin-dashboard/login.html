@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Files Admin - Login</title>
+    <style>
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --text-primary: #f8fafc;
+            --accent-primary: #3b82f6;
+            --accent-danger: #ef4444;
+            --border-color: #334155;
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg-primary); color: var(--text-primary); display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .login-card { background-color: var(--bg-secondary); padding: 2.5rem; border-radius: 12px; width: 350px; text-align: center; border: 1px solid var(--border-color); box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+        .logo { width: 64px; margin-bottom: 1rem; }
+        h1 { font-size: 1.5rem; margin-bottom: 1.5rem; color: #fff; }
+        input { width: 100%; padding: 0.8rem; margin-bottom: 1rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary); color: white; box-sizing: border-box; }
+        button { width: 100%; padding: 0.8rem; background-color: var(--accent-primary); border: none; border-radius: 8px; color: white; cursor: pointer; font-weight: bold; transition: background 0.2s; }
+        button:hover { background-color: #2563eb; }
+        
+        /* Debugging error display */
+        #error-message { 
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--accent-danger);
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            border-radius: 6px;
+            display: none; 
+            font-size: 0.85rem;
+            border: 1px solid var(--accent-danger);
+        }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <img src="/theme/icon/folder1.png" class="logo" alt="Logo">
+        <h1>Files Admin</h1>
+        
+        <div id="error-message"></div>
+
+        <form id="loginForm">
+            <input type="text" id="username" placeholder="Username" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <button type="submit">Login</button>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault(); // Stop form from triggering native reload
+
+            const user = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
+            const errorContainer = document.getElementById('error-message');
+            
+            // Clear previous errors
+            errorContainer.style.display = 'none';
+            errorContainer.textContent = '';
+
+            const auth = btoa(user + ':' + pass);
+            // Explicitly clear any existing session state to prevent 401 traps
+            sessionStorage.removeItem('auth');
+
+            try {
+                // Validate credentials against the API endpoint
+                const response = await fetch('/api/auth', {
+                    headers: { 'Authorization': 'Basic ' + auth }
+                });
+
+                if (response.ok) {
+                    // Store credentials securely in session storage to persist across refreshes
+                    sessionStorage.setItem('auth', auth);
+                    window.location.href = '/-/dashboard';
+                } else {
+                    // Display specific HTTP status error
+                    errorContainer.textContent = `Login failed (Status: ${response.status} ${response.statusText})`;
+                    errorContainer.style.display = 'block';
+                }
+            } catch (err) {
+                // Display network/fetch errors
+                errorContainer.textContent = "Network error: Unable to connect to server.";
+                errorContainer.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,6 +1,7 @@
 FROM docker.angie.software/angie:minimal
 
 ENV DIR="vault"
+ENV TZ="Asia/Jerusalem"
 
 #COPY default.conf /etc/angie/conf.d/
 COPY theme /etc/angie/theme
@@ -8,7 +9,7 @@ COPY run.sh /run.sh
 
 RUN mkdir /data && \
     mkdir -p /etc/angie/conf.d/ && \
-    apk add --no-cache gettext && \
+    apk add --no-cache gettext tzdata && \
     chmod +x /run.sh
 
 ENTRYPOINT [ "./run.sh" ]

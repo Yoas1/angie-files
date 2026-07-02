@@ -1,24 +1,135 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Directory Listing</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/theme/css/dark.min.css">
-    <link rel="stylesheet" href="/theme/css/font-awesome-4.7.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="/theme/css/link-icons.css">
-    <link rel="stylesheet" href="/theme/css/style.css">
+    <title>Angie - Files</title>
+    <style>
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-primary: #3b82f6;
+            --accent-success: #10b981;
+            --accent-danger: #ef4444;
+            --accent-warning: #f59e0b;
+            --border-color: #334155;
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
+            --transition-speed: 0.2s;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.5;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .top-bar {
+            height: 70px;
+            background-color: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            flex-shrink: 0;
+            gap: 16px;
+        }
+        .top-bar-left { display: flex; align-items: center; gap: 16px; }
+        .home-btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            padding: 8px; border-radius: 8px;
+            color: var(--text-secondary);
+            text-decoration: none; transition: all var(--transition-speed);
+        }
+        .home-btn:hover { background-color: var(--bg-tertiary); color: var(--text-primary); }
+        .search-container { position: relative; width: 300px; }
+        .search-input {
+            width: 100%;
+            padding: 0.5rem 1rem 0.5rem 2.5rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            outline: none;
+            font-size: 0.875rem;
+            transition: border-color var(--transition-speed);
+        }
+        .search-input:focus { border-color: var(--accent-primary); }
+        .search-icon {
+            position: absolute; left: 10px; top: 50%;
+            transform: translateY(-50%);
+            width: 16px; height: 16px; fill: var(--text-secondary);
+        }
+        .path-bar {
+            padding: 1rem 2rem;
+            background-color: var(--bg-primary);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+        .breadcrumbs { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: var(--text-secondary); font-weight: 500; }
+        .breadcrumb-item { cursor: pointer; transition: color var(--transition-speed); }
+        .breadcrumb-item:hover { color: var(--text-primary); text-decoration: underline; }
+        .breadcrumb-separator { color: var(--border-color); font-weight: bold; }
+        .stats-info { font-size: 0.8rem; color: var(--text-secondary); }
+        .workspace-panel { flex-grow: 1; padding: 2rem; overflow-y: auto; }
+        .file-table { width: 100%; border-collapse: collapse; }
+        .file-table th {
+            padding: 1rem;
+            border-bottom: 2px solid var(--border-color);
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            text-align: left;
+        }
+        .file-table th:last-child { text-align: right; width: 150px; }
+        .file-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+            vertical-align: middle;
+        }
+        .file-table tr { transition: background-color var(--transition-speed); }
+        .file-table tr:hover { background-color: var(--bg-secondary); }
+        .file-name-cell { display: flex; align-items: center; gap: 12px; font-weight: 500; cursor: pointer; }
+        .file-name-cell:hover { color: var(--accent-primary); }
+        .folder-icon { fill: var(--accent-primary); }
+        .file-icon { fill: var(--text-secondary); }
+        .empty-state {
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; padding: 4rem;
+            color: var(--text-secondary); text-align: center;
+        }
+        .empty-state svg { width: 64px; height: 64px; fill: var(--bg-tertiary); margin-bottom: 1rem; }
+        h1, pre { display: none; }
+    </style>
 </head>
 <body>
-  <div id="title">
-      <div style="display:flex;align-items:center;gap:6px">
-        <img src="/theme/icon/folder1.png" style="width:22px;height:22px" alt="">
-        <span>Directory Listing</span>
-      </div>
-      <div style="display:flex;gap:6px">
-        <span class="stats" id='file-stats'></span>
-        <span class="stats" id='dir-stats'></span>
-      </div>
-  </div>
-  <div id='listing'>
-      <div>
+    <div class="top-bar">
+        <div class="top-bar-left">
+            <img src="/theme/icon/folder1.png" style="width:32px;height:32px" alt="">
+            <div class="search-container">
+                <svg class="search-icon" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+                <input type="text" id="searchInput" class="search-input" placeholder="Search files &amp; folders..." oninput="filterTable()">
+            </div>
+        </div>
+        <a href="/login" style="display:inline-flex;align-items:center;gap:6px;padding:0.5rem 1rem;border-radius:8px;color:var(--text-secondary);text-decoration:none;font-size:0.875rem;font-weight:500;transition:all var(--transition-speed);flex-shrink:0" onmouseover="this.style.background='var(--bg-tertiary)';this.style.color='var(--text-primary)'" onmouseout="this.style.background='transparent';this.style.color='var(--text-secondary)'">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            <span>Dashboard</span>
+        </a>
+    </div>
+    <div class="path-bar">
+        <div class="breadcrumbs" id="breadcrumbs"></div>
+        <div class="stats-info" id="statsInfo">0 files</div>
+    </div>
+    <div class="workspace-panel" id="workspacePanel">
