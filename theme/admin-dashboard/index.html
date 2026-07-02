@@ -609,6 +609,12 @@
                         <span id="quick-vault-text">Vault</span>
                     </a>
                 </li>
+                <li>
+                    <a class="nav-item" onclick="openChangePasswordModal()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+                        <span>Change Password</span>
+                    </a>
+                </li>
             </ul>
 
             <div class="sidebar-footer">
@@ -774,6 +780,30 @@
         </div>
     </div>
 
+    <!-- 5. Change Password Modal -->
+    <div class="modal-overlay" id="changePasswordModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+                <span>Change Password</span>
+            </div>
+            <div class="modal-body">
+                <div style="margin-bottom:1rem">
+                    <label style="display:block;margin-bottom:0.3rem;font-size:0.85rem;color:var(--text-secondary)">New Password</label>
+                    <input type="password" id="newPasswordInput" class="modal-input" placeholder="Enter new password..." onkeydown="handleModalInputKeydown(event, submitPasswordChange)">
+                </div>
+                <div>
+                    <label style="display:block;margin-bottom:0.3rem;font-size:0.85rem;color:var(--text-secondary)">Confirm New Password</label>
+                    <input type="password" id="confirmPasswordInput" class="modal-input" placeholder="Re-enter new password..." onkeydown="handleModalInputKeydown(event, submitPasswordChange)">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('changePasswordModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="submitPasswordChange()">Update Password</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast Notifications Container -->
     <div class="toast-container" id="toastContainer"></div>
 
@@ -869,7 +899,7 @@
          * Helper to get stored auth headers
          */
         function getAuthHeaders() {
-            const auth = localStorage.getItem('auth');
+            const auth = localStorage.getItem('auth') || sessionStorage.getItem('auth');
             return auth ? { 'Authorization': 'Basic ' + auth } : {};
         }
 
@@ -1583,6 +1613,63 @@
             if (cod.includes(ext)) return `<svg class="file-icon" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zM9.5 14.5l-2.21-2.21 2.21-2.21-1.06-1.06L5 12.29l3.44 3.44 1.06-1.06zm5.5.06l-1.06 1.06L16.44 12l-2.5-2.5-1.06 1.06 2.21 2.21-2.21 2.21z" fill="#6366f1"/></svg>`;
             if (txt.includes(ext)) return `<svg class="file-icon" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z" fill="#94a3b8"/></svg>`;
             return `<svg class="file-icon" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z" fill="var(--text-secondary)"/></svg>`;
+        }
+
+        /**
+         * Open Change Password modal
+         */
+        function openChangePasswordModal() {
+            document.getElementById('newPasswordInput').value = '';
+            document.getElementById('confirmPasswordInput').value = '';
+            openModal('changePasswordModal');
+            setTimeout(() => document.getElementById('newPasswordInput').focus(), 100);
+        }
+
+        /**
+         * Submit password change request
+         */
+        async function submitPasswordChange() {
+            const newPass = document.getElementById('newPasswordInput').value;
+            const confirmPass = document.getElementById('confirmPasswordInput').value;
+
+            if (!newPass || newPass.length < 3) {
+                showToast('Password must be at least 3 characters', 'warning');
+                return;
+            }
+            if (newPass !== confirmPass) {
+                showToast('Passwords do not match', 'warning');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/change-password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...getAuthHeaders()
+                    },
+                    body: JSON.stringify({ new_password: newPass })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    closeModal('changePasswordModal');
+                    showToast(data.message || 'Password changed successfully', 'success');
+                    const auth = localStorage.getItem('auth');
+                    if (auth) {
+                        const decoded = atob(auth);
+                        const username = decoded.split(':')[0];
+                        const newAuth = btoa(username + ':' + newPass);
+                        localStorage.setItem('auth', newAuth);
+                        sessionStorage.setItem('auth', newAuth);
+                    }
+                } else {
+                    showToast(data.error || 'Failed to change password', 'danger');
+                }
+            } catch (err) {
+                showToast('Error: ' + err.message, 'danger');
+            }
         }
 
         /**
