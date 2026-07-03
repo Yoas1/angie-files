@@ -1,8 +1,7 @@
 #!/bin/sh
-whoami
+
 FILE="/etc/angie/pass/.htpasswd"
 
-# Default htpasswd is built into image with admin:admin (marker: .htpasswd-default).
 # On first start, env vars USER / PASS can override.
 # If user mounts their own .htpasswd, the marker file is absent, so no override.
 if [ ! -f "$FILE" ]; then
