@@ -7,9 +7,9 @@ FILE="/etc/angie/pass/.htpasswd"
 if [ ! -f "$FILE" ]; then
     # No htpasswd at all (fresh state without build defaults) - generate one
     mkdir -p /etc/angie/pass
-    USER="${USER:-admin}"
-    PASS="${PASS:-admin}"
-    htpasswd -bc "$FILE" "$USER" "$PASS"
+    AF_USER="${AF_USER:-admin}"
+    AF_PASS="${AF_PASS:-admin}"
+    htpasswd -bc "$FILE" "$AF_USER" "$AF_PASS"
 fi
 
 # Always start password change API server (used only when auth is configured)
@@ -45,7 +45,7 @@ server {
     rewrite ^ /admin-dashboard/index.html break;
     root /etc/angie/theme;
     default_type text/html; autoindex off; add_before_body ""; add_after_body "";
-    add_header X-Locked-Directory "/${DIR}/";
+    add_header X-Locked-Directory "/${AF_VAULT_DIR}/";
   }
   location /login {
     rewrite ^ /admin-dashboard/login.html break;
@@ -60,10 +60,10 @@ server {
     add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS, PUT, DELETE, MKCOL' always;
     if ($request_method = 'OPTIONS') { add_header 'Access-Control-Allow-Headers' 'Authorization,Content-Type,Range'; return 204; }
   }
-  location /${DIR}/ { index nothing_will_match; auth_basic "Restricted Area"; auth_basic_user_file /etc/angie/pass/.htpasswd; error_page 401 /theme/401.html; }
+  location /${AF_VAULT_DIR}/ { index nothing_will_match; auth_basic "Restricted Area"; auth_basic_user_file /etc/angie/pass/.htpasswd; error_page 401 /theme/401.html; }
 }
 EOF
-envsubst '${DIR}' < /etc/angie/default.conf.template > /etc/angie/http.d/default.conf
+envsubst '${AF_VAULT_DIR}' < /etc/angie/default.conf.template > /etc/angie/http.d/default.conf
 fi
 chmod -R 777 /data
 echo "done"

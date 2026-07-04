@@ -1,9 +1,9 @@
 FROM docker.angie.software/angie:minimal
 
-ENV DIR="vault"
+ENV AF_VAULT_DIR="vault"
 ENV TZ="Asia/Jerusalem"
-ENV USER="admin"
-ENV PASS="admin"
+ENV AF_USER="admin"
+ENV AF_PASS="admin"
 
 COPY theme /etc/angie/theme
 COPY run.sh /run.sh

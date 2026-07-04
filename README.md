@@ -42,9 +42,9 @@ docker run -it --rm \
 docker run -it --rm \
   -v ./data:/data \
   -p 8080:8080 \
-  -e DIR=secret \
-  -e USER=myuser \
-  -e PASS=mypassword \
+  -e AF_VAULT_DIR=secret \
+  -e AF_USER=myuser \
+  -e AF_PASS=mypassword \
   yoas1/angie-files:v1.0.1
 ```
 
@@ -61,12 +61,12 @@ docker run -it --rm \
   -v ./data:/data \
   -v angie-pass:/etc/angie/pass \
   -p 8080:8080 \
-  -e USER=myuser \
-  -e PASS=mypass \
+  -e AF_USER=myuser \
+  -e AF_PASS=mypass \
   yoas1/angie-files:v1.0.1
 ```
 
-Note: `USER` and `PASS` only take effect on the first container start. After that the file is persisted in the volume and won't be overwritten.
+Note: `AF_USER` and `AF_PASS` only take effect on the first container start. After that the file is persisted in the volume and won't be overwritten.
 
 ### Use an existing .htpasswd file
 
@@ -75,7 +75,7 @@ docker run -it --rm \
   -v ./data:/data \
   -v ./.htpasswd:/etc/angie/pass/.htpasswd \
   -p 8080:8080 \
-  -e DIR=secret \
+  -e AF_VAULT_DIR=<vault-dir> \
   yoas1/angie-files:v1.0.1
 ```
 
@@ -95,9 +95,9 @@ services:
       - angie-data:/data
       - angie-pass:/etc/angie/pass
     environment:
-      DIR: vault-folder
-      USER: myuser
-      PASS: mypassword
+      AF_VAULT_DIR: vault-folder
+      AF_USER: myuser
+      AF_PASS: mypassword
 
 volumes:
   angie-data:
@@ -145,9 +145,9 @@ curl -u admin:admin -X POST \
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `DIR` | `vault` | Locked directory name (password-protected) |
-| `USER` | `admin` | Default username |
-| `PASS` | `admin` | Default password |
+| `AF_VAULT_DIR` | `vault` | Locked directory name (password-protected) |
+| `AF_USER` | `admin` | Default username |
+| `AF_PASS` | `admin` | Default password |
 | `TZ` | `Asia/Jerusalem` | Timezone |
 
 ## Tech Stack
