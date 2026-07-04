@@ -33,7 +33,7 @@ A file management interface powered by [Angie](https://github.com/webserver-llc/
 docker run -it --rm \
   -v ./data:/data \
   -p 8080:8080 \
-  yoas1/angie-files:v1.0.1
+  yoas1/angie-files:v1.0.2
 ```
 
 ### Custom locked directory and credentials
@@ -45,7 +45,7 @@ docker run -it --rm \
   -e AF_VAULT_DIR=secret \
   -e AF_USER=myuser \
   -e AF_PASS=mypassword \
-  yoas1/angie-files:v1.0.1
+  yoas1/angie-files:v1.0.2
 ```
 
 ### Persist password across restarts (Volume)
@@ -63,7 +63,7 @@ docker run -it --rm \
   -p 8080:8080 \
   -e AF_USER=myuser \
   -e AF_PASS=mypass \
-  yoas1/angie-files:v1.0.1
+  yoas1/angie-files:v1.0.2
 ```
 
 Note: `AF_USER` and `AF_PASS` only take effect on the first container start. After that the file is persisted in the volume and won't be overwritten.
@@ -76,10 +76,10 @@ docker run -it --rm \
   -v ./.htpasswd:/etc/angie/pass/.htpasswd \
   -p 8080:8080 \
   -e AF_VAULT_DIR=<vault-dir> \
-  yoas1/angie-files:v1.0.1
+  yoas1/angie-files:v1.0.2
 ```
 
-When mounting a custom `.htpasswd` file, the `USER` and `PASS` env vars are ignored.
+When mounting a custom `.htpasswd` file, the `AF_USER` and `AF_PASS` env vars are ignored.
 
 ## Run with Docker Compose
 ### Full example with password persistence
@@ -87,7 +87,7 @@ When mounting a custom `.htpasswd` file, the `USER` and `PASS` env vars are igno
 ```yaml
 services:
   angie-files:
-    image: yoas1/angie-files:v1.0.1
+    image: yoas1/angie-files:v1.0.2
     container_name: angie-files
     ports:
       - "8080:8080"
