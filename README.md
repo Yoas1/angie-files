@@ -63,7 +63,7 @@ docker run -it --rm \
   -p 8080:8080 \
   -e USER=myuser \
   -e PASS=mypass \
-  angie-files:1.0
+  yoas1/angie-files:v1.0.1
 ```
 
 Note: `USER` and `PASS` only take effect on the first container start. After that the file is persisted in the volume and won't be overwritten.
@@ -76,7 +76,7 @@ docker run -it --rm \
   -v ./.htpasswd:/etc/angie/pass/.htpasswd \
   -p 8080:8080 \
   -e DIR=secret \
-  angie-files:1.0
+  yoas1/angie-files:v1.0.1
 ```
 
 When mounting a custom `.htpasswd` file, the `USER` and `PASS` env vars are ignored.
@@ -87,7 +87,7 @@ When mounting a custom `.htpasswd` file, the `USER` and `PASS` env vars are igno
 ```yaml
 services:
   angie-files:
-    build: .
+    image: yoas1/angie-files:v1.0.1
     container_name: angie-files
     ports:
       - "8080:8080"
